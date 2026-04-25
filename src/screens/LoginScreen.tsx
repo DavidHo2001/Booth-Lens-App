@@ -1,23 +1,22 @@
 import React, {useState} from 'react';
-import {KeyboardAvoidingView, Platform, StyleSheet, View} from 'react-native';
-import {Button, Snackbar, Text, TextInput} from 'react-native-paper';
-import { Image } from 'react-native';
+import {Image, KeyboardAvoidingView, Platform, StyleSheet, View} from 'react-native';
+import {Button, Text, TextInput} from 'react-native-paper';
 import {useAuth} from '../context/AuthContext';
+import {boothLensColors} from '../theme/theme';
+import {showError} from '../utils/snackbarUtils';
 
 export function LoginScreen({navigation}: {navigation: any}) {
   const {login} = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   async function onLogin() {
     try {
       setLoading(true);
-      setError('');
       await login({email, password, keepLoggedIn: true});
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Login failed');
+      showError(e instanceof Error ? e.message : 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -27,15 +26,18 @@ export function LoginScreen({navigation}: {navigation: any}) {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}>
-      
-      <View style={styles.form}>
-      <Image 
-        source={require('../assets/Booth-Lens-Icon-Transparent.png')} 
-        style={styles.logo}
-        resizeMode="contain"
-      />
+
+      <View style={styles.card}>
+        <Image
+          source={require('../assets/Booth-Lens-Icon-Transparent.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
         <Text variant="headlineMedium" style={styles.title}>
           Booth Lens
+        </Text>
+        <Text variant="bodyMedium" style={styles.subtitle}>
+          Your Reliable Trade Show Partner
         </Text>
         <TextInput
           label="Email"
@@ -59,23 +61,41 @@ export function LoginScreen({navigation}: {navigation: any}) {
           Create account
         </Button>
       </View>
-      <Snackbar visible={!!error} onDismiss={() => setError('')}>
-        {error}
-      </Snackbar>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {flex: 1, justifyContent: 'center', padding: 20},
-  form: {gap: 12},
-  title: {textAlign: 'center', marginBottom: 8},
-  input: {backgroundColor: 'transparent'},
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: boothLensColors.background,
+  },
+  card: {
+    gap: 12,
+    padding: 22,
+    borderRadius: 30,
+    backgroundColor: boothLensColors.surface,
+    borderWidth: 1,
+    borderColor: boothLensColors.outline,
+  },
+  title: {
+    textAlign: 'center',
+    color: boothLensColors.primaryDark,
+    fontWeight: '800',
+  },
+  subtitle: {
+    textAlign: 'center',
+    color: boothLensColors.muted,
+    marginBottom: 8,
+  },
+  input: {backgroundColor: boothLensColors.surface},
   logo: {
-    width: 120,       // 你可以根據需要調整圖片寬度
-    height: 120,      // 你可以根據需要調整圖片高度
-    alignSelf: 'center', // 讓圖片水平置中
-    marginBottom: 8,  // 與下方標題保持一點距離
+    width: 136,
+    height: 136,
+    alignSelf: 'center',
+    marginBottom: 4,
   },
 });
 

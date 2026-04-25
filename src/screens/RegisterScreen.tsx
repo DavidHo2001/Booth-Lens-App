@@ -1,7 +1,9 @@
 import React, {useState} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
-import {Button, Snackbar, TextInput} from 'react-native-paper';
+import {Button, Text, TextInput} from 'react-native-paper';
 import {register, sendVerificationCode} from '../api/auth';
+import {boothLensColors} from '../theme/theme';
+import {showError, showSuccess} from '../utils/snackbarUtils';
 
 export function RegisterScreen({navigation}: {navigation: any}) {
   const [form, setForm] = useState({
@@ -12,7 +14,6 @@ export function RegisterScreen({navigation}: {navigation: any}) {
     verificationCode: '',
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   function updateField(key: keyof typeof form, value: string) {
@@ -23,9 +24,9 @@ export function RegisterScreen({navigation}: {navigation: any}) {
     try {
       setLoading(true);
       await sendVerificationCode(form.email);
-      setMessage('Verification code sent to your email');
+      showSuccess('Verification code sent to your email');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to send code');
+      showError(error instanceof Error ? error.message : 'Failed to send code');
     } finally {
       setLoading(false);
     }
@@ -33,16 +34,16 @@ export function RegisterScreen({navigation}: {navigation: any}) {
 
   async function onRegister() {
     if (form.password !== confirmPassword) {
-      setMessage('Passwords do not match, please check!');
+      showError('Passwords do not match, please check!');
       return;
     }
     try {
       setLoading(true);
       await register(form);
-      setMessage('Registration successful, please login');
+      showSuccess('Registration successful, please login');
       navigation.goBack();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Registration failed');
+      showError(error instanceof Error ? error.message : 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -50,7 +51,11 @@ export function RegisterScreen({navigation}: {navigation: any}) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.form}>
+      <View style={styles.formCard}>
+        <Text variant="headlineSmall" style={styles.title}>
+          Create Account
+        </Text>
+        <Text style={styles.subtitle}>Join Booth Lens and start scanning your booth setup.</Text>
         <TextInput label="Username" value={form.username} onChangeText={v => updateField('username', v)} />
         <TextInput label="Email" value={form.email} onChangeText={v => updateField('email', v)} autoCapitalize="none" />
         <TextInput label="Phone (Optional)" value={form.phone} onChangeText={v => updateField('phone', v)} />
@@ -68,15 +73,40 @@ export function RegisterScreen({navigation}: {navigation: any}) {
           Register
         </Button>
       </View>
-      <Snackbar visible={!!message} onDismiss={() => setMessage('')}>
-        {message}
-      </Snackbar>
+      <Text style={styles.footer}>Having trouble? Contact us at support@booth-lens.com</Text>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {padding: 20},
-  form: {gap: 12},
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: boothLensColors.background,
+  },
+  formCard: {
+    gap: 12,
+    padding: 18,
+    borderRadius: 28,
+    backgroundColor: boothLensColors.surface,
+    borderWidth: 1,
+    borderColor: boothLensColors.outline,
+  },
+  title: {
+    color: boothLensColors.primaryDark,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  subtitle: {
+    color: boothLensColors.muted,
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  footer: {
+    textAlign: 'center',
+    bottom: 0,
+    marginTop: 20,
+    color: boothLensColors.muted,
+  },
 });
 

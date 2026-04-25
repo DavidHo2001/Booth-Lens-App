@@ -1,8 +1,9 @@
 import React, {useCallback, useState} from 'react';
-import {FlatList, Linking, RefreshControl, View} from 'react-native';
-import {Button, Card, Snackbar, Text, TextInput} from 'react-native-paper';
+import {FlatList, Image, Linking, Pressable, RefreshControl, StyleSheet, View} from 'react-native';
+import {Button, Card, Menu, Text, TextInput} from 'react-native-paper';
 import {useFocusEffect} from '@react-navigation/native';
 import {launchImageLibrary} from 'react-native-image-picker';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useAuth} from '../context/AuthContext';
 import {
   createCommonRequest,
@@ -11,6 +12,8 @@ import {
   getRequestFiles,
 } from '../api/user';
 import {FileRecordDto, UserRequestDto} from '../types/api';
+import {boothLensColors} from '../theme/theme';
+import {showError, showSuccess} from '../utils/snackbarUtils';
 
 type PickedFile = {
   uri: string;
@@ -27,7 +30,7 @@ export function RequestsScreen() {
   const [sourceReferenceCode, setSourceReferenceCode] = useState('');
   const [files, setFiles] = useState<PickedFile[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [message, setMessage] = useState('');
+  const [requestMenuVisible, setRequestMenuVisible] = useState(false);
 
   const load = useCallback(async () => {
     if (!token) {
@@ -38,7 +41,7 @@ export function RequestsScreen() {
       const data = await getMyRequests(token);
       setRequests(data);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to fetch requests');
+      showError(error instanceof Error ? error.message : 'Failed to fetch requests');
     } finally {
       setRefreshing(false);
     }
@@ -67,6 +70,10 @@ export function RequestsScreen() {
     }
   }
 
+  function removeFile(uri: string) {
+    setFiles(prev => prev.filter(file => file.uri !== uri));
+  }
+
   async function onSubmitRequest() {
     if (!token) {
       return;
@@ -78,13 +85,13 @@ export function RequestsScreen() {
         sourceReferenceCode: sourceReferenceCode || undefined,
         files,
       });
-      setMessage(`Request created: ${response.requestReferenceCode}`);
+      showSuccess(`Request created: ${response.requestReferenceCode}`);
       setRequestInfo('');
       setSourceReferenceCode('');
       setFiles([]);
       await load();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to create request');
+      showError(error instanceof Error ? error.message : 'Failed to create request');
     }
   }
 
@@ -96,7 +103,7 @@ export function RequestsScreen() {
       const items = await getRequestFiles(token, referenceCode);
       setFilesByRequest(prev => ({...prev, [referenceCode]: items}));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to load files');
+      showError(error instanceof Error ? error.message : 'Failed to load files');
     }
   }
 
@@ -108,7 +115,7 @@ export function RequestsScreen() {
       const {downloadUrl} = await getFileDownloadUrl(token, fileId);
       await Linking.openURL(downloadUrl);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to open download URL');
+      showError(error instanceof Error ? error.message : 'Failed to open download URL');
     }
   }
 
@@ -117,30 +124,69 @@ export function RequestsScreen() {
       data={requests}
       keyExtractor={item => String(item.id)}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} />}
-      contentContainerStyle={{padding: 16, gap: 12}}
+      contentContainerStyle={styles.container}
       ListHeaderComponent={
-        <View style={{gap: 10}}>
-          <Text variant="titleLarge">Create Request</Text>
-          <TextInput
-            label="Request Type (SUPPORT / CONTRACTOR)"
-            value={requestType}
-            onChangeText={text =>
-              setRequestType(text.toUpperCase() === 'CONTRACTOR' ? 'CONTRACTOR' : 'SUPPORT')
-            }
-          />
+        <View style={styles.headerCard}>
+          <Text variant="titleLarge" style={styles.title}>
+            Create Request
+          </Text>
+          {/* Request type is intentionally limited until backend adds more supported values. */}
+          <Menu
+            visible={requestMenuVisible}
+            onDismiss={() => setRequestMenuVisible(false)}
+            anchor={
+              <Button
+                mode="outlined"
+                icon="chevron-down"
+                contentStyle={styles.dropdownContent}
+                onPress={() => setRequestMenuVisible(true)}>
+                {requestType === 'SUPPORT' ? 'Support' : 'Contractor'}
+              </Button>
+            }>
+            <Menu.Item
+              leadingIcon="lifebuoy"
+              title="Support"
+              onPress={() => {
+                setRequestType('SUPPORT');
+                setRequestMenuVisible(false);
+              }}
+            />
+            <Menu.Item
+              leadingIcon="account-hard-hat"
+              title="Contractor"
+              onPress={() => {
+                setRequestType('CONTRACTOR');
+                setRequestMenuVisible(false);
+              }}
+            />
+          </Menu>
           <TextInput label="Request Info" value={requestInfo} onChangeText={setRequestInfo} />
           <TextInput
             label="Source Reference Code (optional)"
             value={sourceReferenceCode}
             onChangeText={setSourceReferenceCode}
           />
-          <Button mode="outlined" onPress={onPickFiles}>
+          <Button mode="outlined" icon="image-plus" onPress={onPickFiles}>
             Attach Files ({files.length})
           </Button>
-          <Button mode="contained" onPress={onSubmitRequest}>
+
+          {files.length > 0 ? (
+            <View style={styles.previewList}>
+              {files.map(file => (
+                <View key={file.uri} style={styles.previewCard}>
+                  <Image source={{uri: file.uri}} style={styles.previewImage} />
+                  <Pressable style={styles.removeButton} onPress={() => removeFile(file.uri)}>
+                    <Icon name="close" size={15} color="#FFFFFF" />
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          ) : null}
+
+          <Button mode="contained" icon="send" onPress={onSubmitRequest}>
             Submit Request
           </Button>
-          <Text variant="titleLarge" style={{marginTop: 8}}>
+          <Text variant="titleLarge" style={styles.listTitle}>
             My Requests
           </Text>
         </View>
@@ -148,7 +194,7 @@ export function RequestsScreen() {
       renderItem={({item}) => {
         const filesForItem = filesByRequest[item.referenceCode] ?? [];
         return (
-          <Card>
+          <Card style={styles.requestCard}>
             <Card.Content style={{gap: 6}}>
               <Text variant="titleMedium">{item.referenceCode}</Text>
               <Text>Status: {item.status}</Text>
@@ -165,13 +211,71 @@ export function RequestsScreen() {
           </Card>
         );
       }}
-      ListEmptyComponent={<Text>No requests yet.</Text>}
-      ListFooterComponent={
-        <Snackbar visible={!!message} onDismiss={() => setMessage('')}>
-          {message}
-        </Snackbar>
-      }
+      ListEmptyComponent={<Text style={styles.emptyText}>No requests yet.</Text>}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    gap: 12,
+    backgroundColor: boothLensColors.background,
+  },
+  headerCard: {
+    gap: 12,
+    padding: 16,
+    borderRadius: 24,
+    backgroundColor: boothLensColors.surface,
+    borderWidth: 1,
+    borderColor: boothLensColors.outline,
+  },
+  title: {
+    color: boothLensColors.primaryDark,
+    fontWeight: '800',
+  },
+  dropdownContent: {
+    justifyContent: 'space-between',
+    flexDirection: 'row-reverse',
+  },
+  previewList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  previewCard: {
+    width: 86,
+    height: 86,
+    borderRadius: 18,
+    overflow: 'hidden',
+    backgroundColor: boothLensColors.surfaceSoft,
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+  },
+  removeButton: {
+    position: 'absolute',
+    right: 6,
+    top: 6,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: 'rgba(13,79,128,0.88)',
+  },
+  listTitle: {
+    marginTop: 8,
+    color: boothLensColors.primaryDark,
+    fontWeight: '800',
+  },
+  requestCard: {
+    backgroundColor: boothLensColors.surface,
+  },
+  emptyText: {
+    color: boothLensColors.muted,
+    textAlign: 'center',
+  },
+});
 

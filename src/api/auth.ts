@@ -20,8 +20,17 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
   return data;
 }
 
-export async function sendVerificationCode(email: string): Promise<void> {
-  await axiosService.post('/api/userRegistration/send-verification-code', email);
+export async function sendVerificationCode(email: string): Promise<boolean> {
+  const {data} = await axiosService.post<boolean>(
+    '/api/userRegistration/send-verification-code',
+    email,
+    {
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    },
+  );
+  return data;
 }
 
 export async function register(payload: RegistrationPayload): Promise<boolean> {

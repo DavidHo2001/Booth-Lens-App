@@ -1,10 +1,11 @@
 import React, {useCallback, useState} from 'react';
-import {FlatList, RefreshControl, View} from 'react-native';
+import {FlatList, RefreshControl, StyleSheet, View} from 'react-native';
 import {Button, Card, Text} from 'react-native-paper';
 import {useFocusEffect} from '@react-navigation/native';
 import {useAuth} from '../context/AuthContext';
 import {getMyTransactions} from '../api/user';
 import {TransactionDto} from '../types/api';
+import {boothLensColors} from '../theme/theme';
 
 export function CreditsScreen() {
   const {token, me, refreshMe} = useAuth();
@@ -38,10 +39,10 @@ export function CreditsScreen() {
       data={showTransactions ? transactions : []}
       keyExtractor={item => String(item.id)}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadTransactions} />}
-      contentContainerStyle={{padding: 16, gap: 12}}
+      contentContainerStyle={styles.container}
       ListHeaderComponent={
         <View style={{gap: 12}}>
-          <Card>
+          <Card style={styles.card}>
             <Card.Title title="My Credits" />
             <Card.Content>
               <Text>Balance: {credits?.balance ?? '0.00'}</Text>
@@ -64,7 +65,7 @@ export function CreditsScreen() {
         </View>
       }
       renderItem={({item}) => (
-        <Card>
+        <Card style={styles.card}>
           <Card.Content>
             <Text variant="titleMedium">{item.transactionType}</Text>
             <Text>Status: {item.status}</Text>
@@ -76,10 +77,26 @@ export function CreditsScreen() {
       )}
       ListEmptyComponent={
         showTransactions ? (
-          <Text style={{marginTop: 16}}>No transaction history.</Text>
+          <Text style={styles.emptyText}>No transaction history.</Text>
         ) : null
       }
     />
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    gap: 12,
+    backgroundColor: boothLensColors.background,
+  },
+  card: {
+    backgroundColor: boothLensColors.surface,
+  },
+  emptyText: {
+    marginTop: 16,
+    color: boothLensColors.muted,
+    textAlign: 'center',
+  },
+});
 

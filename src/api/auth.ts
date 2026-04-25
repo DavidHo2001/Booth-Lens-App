@@ -16,34 +16,22 @@ export type RegistrationPayload = {
 };
 
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
-  const response = await axiosService.post('/api/auth/login', payload);
-  if (response.status !== 200) {
-    throw new Error('Failed to login');
-  }
-  return response.data;
+  const {data} = await axiosService.post<LoginResponse>('/api/auth/login', payload);
+  return data;
 }
 
 export async function sendVerificationCode(email: string): Promise<void> {
-  const response = await axiosService.post(
-    '/api/userRegistration/send-verification-code',
-    email,
-  );
-  if (response.status !== 200) {
-    throw new Error('Failed to send verification code');
-  }
+  await axiosService.post('/api/userRegistration/send-verification-code', email);
 }
 
 export async function register(payload: RegistrationPayload): Promise<boolean> {
-  const response = await axiosService.post('/api/userRegistration', payload);
-  if (response.status !== 200) {
-    throw new Error('Failed to register');
-  }
-  return response.data;
+  const {data} = await axiosService.post<boolean>('/api/userRegistration', payload);
+  return data;
 }
 
 export async function logout(token: string | null): Promise<void> {
   try {
-    const response = await axiosService.post(
+    await axiosService.post(
       '/api/auth/logout',
       {},
       token
@@ -54,9 +42,6 @@ export async function logout(token: string | null): Promise<void> {
           }
         : undefined,
     );
-    if (response.status !== 200) {
-      throw new Error('Failed to logout');
-    }
   } catch {
     // Backend logout is best-effort only for now.
   }

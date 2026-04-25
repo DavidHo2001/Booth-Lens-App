@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {KeyboardAvoidingView, Platform, StyleSheet, View} from 'react-native';
 import {Button, Snackbar, Text, TextInput} from 'react-native-paper';
+import { Image } from 'react-native';
 import {useAuth} from '../context/AuthContext';
 
 export function LoginScreen({navigation}: {navigation: any}) {
@@ -26,7 +27,13 @@ export function LoginScreen({navigation}: {navigation: any}) {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}>
+      
       <View style={styles.form}>
+      <Image 
+        source={require('../assets/Booth-Lens-Icon-Transparent.png')} 
+        style={styles.logo}
+        resizeMode="contain"
+      />
         <Text variant="headlineMedium" style={styles.title}>
           Booth Lens
         </Text>
@@ -64,5 +71,11 @@ const styles = StyleSheet.create({
   form: {gap: 12},
   title: {textAlign: 'center', marginBottom: 8},
   input: {backgroundColor: 'transparent'},
+  logo: {
+    width: 120,       // 你可以根據需要調整圖片寬度
+    height: 120,      // 你可以根據需要調整圖片高度
+    alignSelf: 'center', // 讓圖片水平置中
+    marginBottom: 8,  // 與下方標題保持一點距離
+  },
 });
 

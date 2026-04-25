@@ -25,51 +25,51 @@ export type Announcement = {
 
 //I edited this for your reference (my coding style).
 export async function getAnnouncements(token: string): Promise<Announcement[]> {
-  const response = await axiosService.get('/api/admin/announcements', {
+  const {data} = await axiosService.get<Announcement[]>('/api/admin/announcements', {
     headers: token ? {Authorization: `Bearer ${token}`} : undefined,
   });
-  if (response.status !== 200) {
-    throw new Error('Failed to get announcements');
-  }
-  return response.data;
+  return data;
 }
 
 export async function searchAdminRequests(
   token: string,
   payload: {keyword?: string; status?: string; page?: number; limit?: number},
 ): Promise<PaginatedResponse<UserRequestDto>> {
-  const response = await axiosService.post('/api/admin/requests/search', payload, {
-    headers: token ? {Authorization: `Bearer ${token}`} : undefined,
-  });
-  if (response.status !== 200) {
-    throw new Error('Failed to search admin requests');
-  }
-  return response.data;
+  const {data} = await axiosService.post<PaginatedResponse<UserRequestDto>>(
+    '/api/admin/requests/search',
+    payload,
+    {
+      headers: token ? {Authorization: `Bearer ${token}`} : undefined,
+    },
+  );
+  return data;
 }
 
 export async function searchAdminTransactions(
   token: string,
   payload: {keyword?: string; page?: number; limit?: number},
 ): Promise<PaginatedResponse<TransactionDto>> {
-  const response = await axiosService.post('/api/admin/transactions/search', payload, {
-    headers: token ? {Authorization: `Bearer ${token}`} : undefined,
-  });
-  if (response.status !== 200) {
-    throw new Error('Failed to search admin transactions');
-  }
-  return response.data;
+  const {data} = await axiosService.post<PaginatedResponse<TransactionDto>>(
+    '/api/admin/transactions/search',
+    payload,
+    {
+      headers: token ? {Authorization: `Bearer ${token}`} : undefined,
+    },
+  );
+  return data;
 }
 
 export async function searchAdminCredits(
   token: string,
   payload: {keyword?: string; page?: number; limit?: number},
 ): Promise<PaginatedResponse<UserCreditsResponse>> {
-  const response = await axiosService.post('/api/admin/credits/search', payload, {
-    headers: token ? {Authorization: `Bearer ${token}`} : undefined,
-  });
-  if (response.status !== 200) {
-    throw new Error('Failed to search admin credits');
-  }
-  return response.data;
+  const {data} = await axiosService.post<PaginatedResponse<UserCreditsResponse>>(
+    '/api/admin/credits/search',
+    payload,
+    {
+      headers: token ? {Authorization: `Bearer ${token}`} : undefined,
+    },
+  );
+  return data;
 }
 

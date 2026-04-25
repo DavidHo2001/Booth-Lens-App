@@ -22,12 +22,9 @@ export async function analyzeBooth(
   formData.append('boothSizeUnit', payload.boothSizeUnit);
   formData.append('requestInfo', payload.requestInfo ?? '');
 
-  const response = await axiosService.post('/api/v1/booth/analyze', formData, {
+  const {data} = await axiosService.post<string>('/api/v1/booth/analyze', formData, {
     headers: token ? {Authorization: `Bearer ${token}`} : undefined,
   });
-  if (response.status !== 200) {
-    throw new Error('Failed to analyze booth');
-  }
-  return response.data;
+  return data;
 }
 

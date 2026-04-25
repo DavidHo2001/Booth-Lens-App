@@ -11,55 +11,43 @@ import {
 } from '../types/api';
 
 export async function getMe(token: string): Promise<MeResponse> {
-  const response = await axiosService.get('/api/v1/user/me', {
+  const {data} = await axiosService.get<MeResponse>('/api/v1/user/me', {
     headers: token ? {Authorization: `Bearer ${token}`} : undefined,
   });
-  if (response.status !== 200) {
-    throw new Error('Failed to fetch me data');
-  }
-  return response.data;
+  return data;
 }
 
 export async function getMyRequests(token: string): Promise<UserRequestDto[]> {
-  const response = await axiosService.get('/api/v1/user/requests', {
+  const {data} = await axiosService.get<UserRequestDto[]>('/api/v1/user/requests', {
     headers: token ? {Authorization: `Bearer ${token}`} : undefined,
   });
-  if (response.status !== 200) {
-    throw new Error('Failed to fetch requests');
-  }
-  return response.data;
+  return data;
 }
 
 export async function getRequestFiles(
   token: string,
   referenceCode: string,
 ): Promise<FileRecordDto[]> {
-  const response = await axiosService.get(
+  const {data} = await axiosService.get<FileRecordDto[]>(
     `/api/v1/user/requests/${referenceCode}/files`,
     {
       headers: token ? {Authorization: `Bearer ${token}`} : undefined,
     },
   );
-  if (response.status !== 200) {
-    throw new Error('Failed to fetch request files');
-  }
-  return response.data;
+  return data;
 }
 
 export async function getFileDownloadUrl(
   token: string,
   fileRecordId: number,
 ): Promise<{downloadUrl: string}> {
-  const response = await axiosService.get(
+  const {data} = await axiosService.get<{downloadUrl: string}>(
     `/api/v1/user/files/${fileRecordId}/download`,
     {
       headers: token ? {Authorization: `Bearer ${token}`} : undefined,
     },
   );
-  if (response.status !== 200) {
-    throw new Error('Failed to generate download URL');
-  }
-  return response.data;
+  return data;
 }
 
 export async function createCommonRequest(
@@ -85,43 +73,35 @@ export async function createCommonRequest(
     formData.append('files', file as unknown as Blob);
   });
 
-  const response = await axiosService.post('/api/v1/user/requests', formData, {
-    headers: token ? {Authorization: `Bearer ${token}`} : undefined,
-  });
-  if (response.status !== 200) {
-    throw new Error('Failed to create request');
-  }
-  return response.data;
+  const {data} = await axiosService.post<CommonRequestResponse>(
+    '/api/v1/user/requests',
+    formData,
+    {
+      headers: token ? {Authorization: `Bearer ${token}`} : undefined,
+    },
+  );
+  return data;
 }
 
 export async function getMyTransactions(token: string): Promise<TransactionDto[]> {
-  const response = await axiosService.get('/api/v1/user/transactions', {
+  const {data} = await axiosService.get<TransactionDto[]>('/api/v1/user/transactions', {
     headers: token ? {Authorization: `Bearer ${token}`} : undefined,
   });
-  if (response.status !== 200) {
-    throw new Error('Failed to fetch transactions');
-  }
-  return response.data;
+  return data;
 }
 
 export async function getMyCredits(token: string): Promise<UserCreditsResponse> {
-  const response = await axiosService.get('/api/v1/user/credits', {
+  const {data} = await axiosService.get<UserCreditsResponse>('/api/v1/user/credits', {
     headers: token ? {Authorization: `Bearer ${token}`} : undefined,
   });
-  if (response.status !== 200) {
-    throw new Error('Failed to fetch credits');
-  }
-  return response.data;
+  return data;
 }
 
 export async function fetchProfile(token: string): Promise<ProfileResponse> {
-  const response = await axiosService.get('/api/profile/fetchProfile', {
+  const {data} = await axiosService.get<ProfileResponse>('/api/profile/fetchProfile', {
     headers: token ? {Authorization: `Bearer ${token}`} : undefined,
   });
-  if (response.status !== 200) {
-    throw new Error('Failed to fetch profile');
-  }
-  return response.data;
+  return data;
 }
 
 export async function updateProfile(
@@ -132,11 +112,8 @@ export async function updateProfile(
     confirmPassword?: string;
   },
 ): Promise<void> {
-  const response = await axiosService.patch('/api/profile/update', payload, {
+  await axiosService.patch('/api/profile/update', payload, {
     headers: token ? {Authorization: `Bearer ${token}`} : undefined,
   });
-  if (response.status !== 200) {
-    throw new Error('Failed to update profile');
-  }
 }
 

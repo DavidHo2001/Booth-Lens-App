@@ -13,6 +13,7 @@ export function RegisterScreen({navigation}: {navigation: any}) {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   function updateField(key: keyof typeof form, value: string) {
     setForm(prev => ({...prev, [key]: value}));
@@ -22,7 +23,7 @@ export function RegisterScreen({navigation}: {navigation: any}) {
     try {
       setLoading(true);
       await sendVerificationCode(form.email);
-      setMessage('Verification code sent');
+      setMessage('Verification code sent to your email');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to send code');
     } finally {
@@ -31,6 +32,10 @@ export function RegisterScreen({navigation}: {navigation: any}) {
   }
 
   async function onRegister() {
+    if (form.password !== confirmPassword) {
+      setMessage('Passwords do not match, please check!');
+      return;
+    }
     try {
       setLoading(true);
       await register(form);
@@ -48,8 +53,9 @@ export function RegisterScreen({navigation}: {navigation: any}) {
       <View style={styles.form}>
         <TextInput label="Username" value={form.username} onChangeText={v => updateField('username', v)} />
         <TextInput label="Email" value={form.email} onChangeText={v => updateField('email', v)} autoCapitalize="none" />
-        <TextInput label="Phone" value={form.phone} onChangeText={v => updateField('phone', v)} />
+        <TextInput label="Phone (Optional)" value={form.phone} onChangeText={v => updateField('phone', v)} />
         <TextInput label="Password" value={form.password} onChangeText={v => updateField('password', v)} secureTextEntry />
+        <TextInput label="Confirm Password" value={confirmPassword} onChangeText={v => setConfirmPassword(v)} secureTextEntry />
         <TextInput
           label="Verification Code"
           value={form.verificationCode}

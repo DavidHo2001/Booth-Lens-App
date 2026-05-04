@@ -1,7 +1,6 @@
 import axiosService from './axios';
 
 export async function analyzeBooth(
-  token: string,
   payload: {
     boothWidth: number;
     boothLength: number;
@@ -22,9 +21,7 @@ export async function analyzeBooth(
   formData.append('boothSizeUnit', payload.boothSizeUnit);
   formData.append('requestInfo', payload.requestInfo ?? '');
 
-  const {data} = await axiosService.post<string>('/api/v1/booth/analyze', formData, {
-    headers: token ? {Authorization: `Bearer ${token}`} : undefined,
-  });
+  const {data} = await axiosService.post<string>('/api/v1/booth/analyze', formData);
   return data;
 }
 

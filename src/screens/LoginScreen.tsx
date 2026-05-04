@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Image, KeyboardAvoidingView, Platform, StyleSheet, View} from 'react-native';
+import {Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, View, TouchableWithoutFeedback} from 'react-native';
 import {Button, Text, TextInput} from 'react-native-paper';
 import {useAuth} from '../context/AuthContext';
 import {boothLensColors} from '../theme/theme';
@@ -23,45 +23,50 @@ export function LoginScreen({navigation}: {navigation: any}) {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.container}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.container}>
 
-      <View style={styles.card}>
-        <Image
-          source={require('../assets/Booth-Lens-Icon-Transparent.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Text variant="headlineMedium" style={styles.title}>
-          Booth Lens
-        </Text>
-        <Text variant="bodyMedium" style={styles.subtitle}>
-          Your Reliable Trade Show Partner
-        </Text>
-        <TextInput
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          style={styles.input}
-        />
-        <TextInput
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={styles.input}
-        />
-        <Button mode="contained" onPress={onLogin} loading={loading} disabled={loading}>
-          Login
-        </Button>
-        <Button mode="text" onPress={() => navigation.navigate('Register')}>
-          Create account
-        </Button>
-      </View>
-    </KeyboardAvoidingView>
+        <View style={styles.card}>
+          <Image
+            source={require('../assets/Booth-Lens-Icon-Transparent.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text variant="headlineMedium" style={styles.title}>
+            Booth Lens
+          </Text>
+          <Text variant="bodyMedium" style={styles.subtitle}>
+            Your Reliable Trade Show Partner
+          </Text>
+          <TextInput
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            style={styles.input}
+          />
+          <TextInput
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            style={styles.input}
+          />
+          <Button mode="contained" onPress={onLogin} loading={loading} disabled={loading}>
+            Login
+          </Button>
+          <Button mode="text" onPress={() => navigation.navigate('ForgotPassword')}>
+            Forgot password?
+          </Button>
+          <Button mode="text" onPress={() => navigation.navigate('Register')}>
+            Create account
+          </Button>
+        </View>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 

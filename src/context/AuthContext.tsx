@@ -33,7 +33,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
       return;
     }
     try {
-      const data = await getMe(token);
+      const data = await getMe();
       setMe(data);
     } catch (error) {
       await logout();
@@ -46,7 +46,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
       const result = await loginApi(payload);
       await setToken(result.token);
       setTokenState(result.token);
-      const meData = await getMe(result.token);
+      const meData = await getMe();
       setMe(meData);
     },
     [],
@@ -61,7 +61,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
           return;
         }
         setTokenState(storedToken);
-        const meData = await getMe(storedToken);
+        const meData = await getMe();
         setMe(meData);
       } catch {
         await clearToken();

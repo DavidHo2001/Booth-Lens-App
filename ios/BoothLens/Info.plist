@@ -33,14 +33,14 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
 	<key>NSCameraUsageDescription</key>
 	<string>Booth Lens needs camera access so you can scan trade show booth photos.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Booth Lens needs photo library access so you can upload booth and request images.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string></string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Booth Lens may save captured booth photos to your photo library when requested.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Booth Lens needs photo library access so you can upload booth and request images.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

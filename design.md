@@ -182,3 +182,16 @@ Non-functional requirements
 - Add loading and skeleton states for all major pages.
 - Avoid duplicate API calls when `/me` data already has needed fields.
 - Keep secure logging: do not log JWT token.
+
+
+Design Phase 3:
+For Backend Related features, please see 
+1. compress photo to less than 1 MB for each before submit
+2. Create A constant.ts to store all constants and reuse. e.g. MAX_IMAGES = 5 should be put there and share across pages
+3. All pages should show full screen instead of having a Card with boarder to include the text.
+4. Admin page should have serval button(AdminManagementController.java has provided the endpoints):
+ 4.1 Button [Announcement] -> go to another screen with CRUD announcement functions
+ 4.2 Button [User Requests] -> go to a screen with Searching, filtering, pagination of user requests (See Specification UserRequestSpecifications.withFilters)
+ 4.3 Button [User Transaction] -> Transaction Searching
+ 4.4 Button [User Credits] -> Credits searching, with adjustment function
+

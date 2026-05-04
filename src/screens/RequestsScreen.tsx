@@ -1,6 +1,6 @@
 import React, {useCallback, useState} from 'react';
 import {FlatList, Image, Linking, Pressable, RefreshControl, StyleSheet, View} from 'react-native';
-import {Button, Card, Menu, Text, TextInput} from 'react-native-paper';
+import {Button, Menu, Text, TextInput} from 'react-native-paper';
 import {useFocusEffect} from '@react-navigation/native';
 import {launchImageLibrary} from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -11,6 +11,8 @@ import {
   getMyRequests,
   getRequestFiles,
 } from '../api/user';
+import {IMAGE_PICKER_OPTIONS, MAX_IMAGES, MAX_UPLOAD_IMAGE_BYTES} from '../constants/constants';
+import {compressImagesToUnderLimit, formatMegabytes} from '../utils/imageUtils';
 import {FileRecordDto, UserRequestDto} from '../types/api';
 import {boothLensColors} from '../theme/theme';
 import {showError, showSuccess} from '../utils/snackbarUtils';
@@ -38,7 +40,7 @@ export function RequestsScreen() {
     }
     try {
       setRefreshing(true);
-      const data = await getMyRequests(token);
+      const data = await getMyRequests();
       setRequests(data);
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to fetch requests');
@@ -54,9 +56,18 @@ export function RequestsScreen() {
   );
 
   async function onPickFiles() {
+    const remainingSlots = MAX_IMAGES - files.length;
+    if (remainingSlots <= 0) {
+      showError(`Maximum ${MAX_IMAGES} attachments allowed`);
+      return;
+    }
+
     const result = await launchImageLibrary({
       mediaType: 'photo',
-      selectionLimit: 5,
+      selectionLimit: remainingSlots,
+      maxWidth: IMAGE_PICKER_OPTIONS.maxWidth,
+      maxHeight: IMAGE_PICKER_OPTIONS.maxHeight,
+      assetRepresentationMode: 'compatible',
     });
     if (result.assets?.length) {
       const picked = result.assets
@@ -66,7 +77,15 @@ export function RequestsScreen() {
           type: asset.type!,
           name: asset.fileName!,
         }));
-      setFiles(prev => [...prev, ...picked]);
+      const compressed = await compressImagesToUnderLimit(picked, MAX_UPLOAD_IMAGE_BYTES);
+      if (compressed.failed.length > 0) {
+        const first = compressed.failed[0];
+        const sizeLabel = first.sizeBytes ? formatMegabytes(first.sizeBytes) : 'unknown size';
+        showError(
+          `Could not compress "${first.name}" below 1 MB (current: ${sizeLabel}). Please choose another file.`,
+        );
+      }
+      setFiles(prev => [...prev, ...compressed.files].slice(0, MAX_IMAGES));
     }
   }
 
@@ -78,12 +97,21 @@ export function RequestsScreen() {
     if (!token) {
       return;
     }
+    const compressed = await compressImagesToUnderLimit(files, MAX_UPLOAD_IMAGE_BYTES);
+    if (compressed.failed.length > 0) {
+      const first = compressed.failed[0];
+      const sizeLabel = first.sizeBytes ? formatMegabytes(first.sizeBytes) : 'unknown size';
+      showError(
+        `Could not compress "${first.name}" below 1 MB (current: ${sizeLabel}). Please choose another file.`,
+      );
+      return;
+    }
     try {
-      const response = await createCommonRequest(token, {
+      const response = await createCommonRequest({
         requestType,
         requestInfo,
         sourceReferenceCode: sourceReferenceCode || undefined,
-        files,
+        files: compressed.files,
       });
       showSuccess(`Request created: ${response.requestReferenceCode}`);
       setRequestInfo('');
@@ -100,7 +128,7 @@ export function RequestsScreen() {
       return;
     }
     try {
-      const items = await getRequestFiles(token, referenceCode);
+      const items = await getRequestFiles(referenceCode);
       setFilesByRequest(prev => ({...prev, [referenceCode]: items}));
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to load files');
@@ -112,7 +140,7 @@ export function RequestsScreen() {
       return;
     }
     try {
-      const {downloadUrl} = await getFileDownloadUrl(token, fileId);
+      const {downloadUrl} = await getFileDownloadUrl(fileId);
       await Linking.openURL(downloadUrl);
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to open download URL');
@@ -194,21 +222,19 @@ export function RequestsScreen() {
       renderItem={({item}) => {
         const filesForItem = filesByRequest[item.referenceCode] ?? [];
         return (
-          <Card style={styles.requestCard}>
-            <Card.Content style={{gap: 6}}>
-              <Text variant="titleMedium">{item.referenceCode}</Text>
-              <Text>Status: {item.status}</Text>
-              <Text>{item.requestInfo}</Text>
-              <Button mode="text" onPress={() => onLoadFiles(item.referenceCode)}>
-                Load Files
+          <View style={styles.requestItem}>
+            <Text variant="titleMedium">{item.referenceCode}</Text>
+            <Text>Status: {item.status}</Text>
+            <Text>{item.requestInfo}</Text>
+            <Button mode="text" onPress={() => onLoadFiles(item.referenceCode)}>
+              Load Files
+            </Button>
+            {filesForItem.map(file => (
+              <Button key={file.id} mode="text" onPress={() => onDownloadFile(file.id)}>
+                Download: {file.fileName}
               </Button>
-              {filesForItem.map(file => (
-                <Button key={file.id} mode="text" onPress={() => onDownloadFile(file.id)}>
-                  Download: {file.fileName}
-                </Button>
-              ))}
-            </Card.Content>
-          </Card>
+            ))}
+          </View>
         );
       }}
       ListEmptyComponent={<Text style={styles.emptyText}>No requests yet.</Text>}
@@ -227,8 +253,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 24,
     backgroundColor: boothLensColors.surface,
-    borderWidth: 1,
-    borderColor: boothLensColors.outline,
   },
   title: {
     color: boothLensColors.primaryDark,
@@ -270,8 +294,11 @@ const styles = StyleSheet.create({
     color: boothLensColors.primaryDark,
     fontWeight: '800',
   },
-  requestCard: {
+  requestItem: {
     backgroundColor: boothLensColors.surface,
+    borderRadius: 14,
+    padding: 14,
+    gap: 6,
   },
   emptyText: {
     color: boothLensColors.muted,

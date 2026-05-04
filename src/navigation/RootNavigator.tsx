@@ -5,6 +5,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {ActivityIndicator, Text} from 'react-native-paper';
 import {useAuth} from '../context/AuthContext';
 import {LoginScreen} from '../screens/LoginScreen';
+import {ForgotPasswordScreen} from '../screens/ForgotPasswordScreen';
 import {RegisterScreen} from '../screens/RegisterScreen';
 import {MainTabs} from './MainTabs';
 import {boothLensColors, navigationTheme} from '../theme/theme';
@@ -48,8 +49,14 @@ export function RootNavigator() {
           />
         ) : (
           <>
+          {/* 如果沒有特別指定初始畫面，<Stack.Navigator> 會自動將「程式碼中排列在最前面（第一個）」的 <Stack.Screen> 當作預設顯示的畫面。 */}
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPasswordScreen}
+              options={{title: 'Reset Password'}}
+            />
           </>
         )}
       </Stack.Navigator>

@@ -15,6 +15,13 @@ export type RegistrationPayload = {
   verificationCode: string;
 };
 
+export type ResetPasswordPayload = {
+  email: string;
+  verificationCode: string;
+  newPassword: string;
+  confirmNewPassword: string;
+};
+
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
   const {data} = await axiosService.post<LoginResponse>('/api/auth/login', payload);
   return data;
@@ -54,5 +61,20 @@ export async function logout(token: string | null): Promise<void> {
   } catch {
     // Backend logout is best-effort only for now.
   }
+}
+
+export async function sendPasswordResetVerificationCode(email: string): Promise<void> {
+  await axiosService.post('/api/email/send-verification-code', email, {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+  });
+}
+
+export async function resetPassword(
+  payload: ResetPasswordPayload,
+): Promise<boolean> {
+  const {data} = await axiosService.patch<boolean>(`/api/email/reset-password`, payload);
+  return data;
 }
 

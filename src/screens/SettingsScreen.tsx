@@ -10,17 +10,15 @@ export function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <Text variant="headlineSmall" style={styles.title}>Settings</Text>
-        <Button
-          mode="contained"
-          onPress={async () => {
-            await logout();
-            showSuccess('Logged out');
-          }}>
-          Logout
-        </Button>
-      </View>
+      <Text variant="headlineSmall" style={styles.title}>Settings</Text>
+      <Button
+        mode="contained"
+        onPress={async () => {
+          await logout();
+          showSuccess('Logged out');
+        }}>
+        Logout
+      </Button>
     </View>
   );
 }
@@ -31,17 +29,10 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: boothLensColors.background,
   },
-  card: {
-    gap: 12,
-    padding: 16,
-    borderRadius: 24,
-    backgroundColor: boothLensColors.surface,
-    borderWidth: 1,
-    borderColor: boothLensColors.outline,
-  },
   title: {
     color: boothLensColors.primaryDark,
     fontWeight: '800',
+    marginBottom: 12,
   },
 });
 

@@ -87,3 +87,12 @@ export type CommonRequestResponse = {
   requestType: CommonRequestType;
 };
 
+export type Announcement = {
+  id: number;
+  title: string;
+  body: string;
+  active: boolean;
+  createdBy?: number;
+  createdAt?: string;
+  updatedAt?: string;
+};

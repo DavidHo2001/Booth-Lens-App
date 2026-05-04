@@ -9,12 +9,17 @@ export function RegisterScreen({navigation}: {navigation: any}) {
   const [form, setForm] = useState({
     username: '',
     email: '',
-    phone: '',
     password: '',
     verificationCode: '',
   });
+  
+  // 🌟 Separate states for phone
+  const [areaCode, setAreaCode] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  
   const [loading, setLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
 
   function updateField(key: keyof typeof form, value: string) {
     setForm(prev => ({...prev, [key]: value}));
@@ -25,6 +30,7 @@ export function RegisterScreen({navigation}: {navigation: any}) {
       setLoading(true);
       await sendVerificationCode(form.email);
       showSuccess('Verification code sent to your email');
+      setShowPasswordFields(true);
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to send code');
     } finally {
@@ -39,7 +45,10 @@ export function RegisterScreen({navigation}: {navigation: any}) {
     }
     try {
       setLoading(true);
-      await register(form);
+      // 🌟 Combine before sending
+      const finalPhone = areaCode && phoneNumber ? `${areaCode}-${phoneNumber}` : phoneNumber;
+      
+      await register({ ...form, phone: finalPhone });
       showSuccess('Registration successful, please login');
       navigation.goBack();
     } catch (error) {
@@ -56,9 +65,32 @@ export function RegisterScreen({navigation}: {navigation: any}) {
           Create Account
         </Text>
         <Text style={styles.subtitle}>Join Booth Lens and start scanning your booth setup.</Text>
+        
         <TextInput label="Username" value={form.username} onChangeText={v => updateField('username', v)} />
-        <TextInput label="Email" value={form.email} onChangeText={v => updateField('email', v)} autoCapitalize="none" />
-        <TextInput label="Phone (Optional)" value={form.phone} onChangeText={v => updateField('phone', v)} />
+        <TextInput label="Email" value={form.email} onChangeText={v => updateField('email', v)} autoCapitalize="none" keyboardType="email-address" />
+        <Button mode="outlined" onPress={onSendCode} loading={loading} style={{marginTop: 8}}>
+          Send Verification Code
+        </Button>
+        {showPasswordFields && (<>
+        {/* 🌟 Two blocks for Phone Number */}
+        <View style={styles.phoneRow}>
+          <TextInput 
+            label="Code" 
+            value={areaCode} 
+            onChangeText={setAreaCode} 
+            style={styles.areaCodeInput} 
+            keyboardType="phone-pad"
+            placeholder="852"
+          />
+          <TextInput 
+            label="Phone (Optional)" 
+            value={phoneNumber} 
+            onChangeText={setPhoneNumber} 
+            style={styles.phoneInput} 
+            keyboardType="phone-pad"
+          />
+        </View>
+
         <TextInput label="Password" value={form.password} onChangeText={v => updateField('password', v)} secureTextEntry />
         <TextInput label="Confirm Password" value={confirmPassword} onChangeText={v => setConfirmPassword(v)} secureTextEntry />
         <TextInput
@@ -66,12 +98,11 @@ export function RegisterScreen({navigation}: {navigation: any}) {
           value={form.verificationCode}
           onChangeText={v => updateField('verificationCode', v)}
         />
-        <Button mode="outlined" onPress={onSendCode} loading={loading}>
-          Send Verification Code
-        </Button>
         <Button mode="contained" onPress={onRegister} loading={loading}>
           Register
         </Button>
+        </>
+        )}
       </View>
       <Text style={styles.footer}>Having trouble? Contact us at support@booth-lens.com</Text>
     </ScrollView>
@@ -102,6 +133,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 6,
   },
+  // 🌟 Styles for the phone row
+  phoneRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  areaCodeInput: {
+    flex: 1,
+  },
+  phoneInput: {
+    flex: 2.5,
+  },
   footer: {
     textAlign: 'center',
     bottom: 0,
@@ -109,4 +151,3 @@ const styles = StyleSheet.create({
     color: boothLensColors.muted,
   },
 });
-

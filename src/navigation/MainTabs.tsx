@@ -9,9 +9,12 @@ import {BoothAnalyzeScreen} from '../screens/BoothAnalyzeScreen';
 import {RequestsScreen} from '../screens/RequestsScreen';
 import {ProfileScreen} from '../screens/ProfileScreen';
 import {SettingsScreen} from '../screens/SettingsScreen';
-import {AdminScreen} from '../screens/AdminScreen';
+import {AdminStack} from './AdminStack';
 import {boothLensColors} from '../theme/theme';
-
+const EmptyScreen = () => null;
+function DummyTabButton() {
+  return <View style={styles.dummyTabButton} />;
+}
 const Tab = createBottomTabNavigator();
 const iconMap: Record<string, string> = {
   Home: 'home-outline',
@@ -48,13 +51,32 @@ export function MainTabs() {
             <Icon name={iconMap[route.name] ?? 'circle-outline'} size={size} color={color} />
           ),
       })}>
+      {/* 左邊 3 個按鈕 */}
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Credits" component={CreditsScreen} />
-      <Tab.Screen name="Scan" component={BoothAnalyzeScreen} />
       <Tab.Screen name="Requests" component={RequestsScreen} />
+      
+      {/* 中間 1 個按鈕 (Scan) */}
+      <Tab.Screen name="Scan" component={BoothAnalyzeScreen} />
+      {showAdmin ? (
+        // 如果是管理員，正常顯示 Admin 按鈕 (右邊變成 3 個，天平平衡)
+        <Tab.Screen name="Admin" component={AdminStack} options={{headerShown: false}} />
+      ) : (
+        // 如果不是管理員，我們放一個「隱形的假按鈕」來佔位子 (右邊也是 3 個，天平平衡)
+        <Tab.Screen 
+          name="Dummy" 
+          component={EmptyScreen} 
+          options={{
+            // tabBarButton 可以讓我們自訂這顆按鈕的長相
+            // 我們回傳一個沒有內容的 <View style={{ flex: 1 }} />
+            // 它看不見、點不到，但會乖乖佔據 1 份空間！
+            tabBarButton: DummyTabButton,
+          }}
+        />
+      )}
+      {/* 右邊 2 個按鈕 */}
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
-      {showAdmin ? <Tab.Screen name="Admin" component={AdminScreen} /> : null}
     </Tab.Navigator>
   );
 }
@@ -101,6 +123,9 @@ const styles = StyleSheet.create({
   },
   scanButtonActive: {
     backgroundColor: boothLensColors.primaryDark,
+  },
+  dummyTabButton: {
+    flex: 1,
   },
 });
 

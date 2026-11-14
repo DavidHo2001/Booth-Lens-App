@@ -11,7 +11,7 @@ export function ProfileScreen() {
   const {token, me, refreshMe} = useAuth();
   const [loading, setLoading] = useState(false);
   
-  // 🌟 Add separate states for area code and phone number
+  // Area code and local number are edited separately, then joined for the API.
   const [areaCode, setAreaCode] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
 
@@ -42,7 +42,7 @@ export function ProfileScreen() {
         country: profile.country ?? '',
       });
 
-      // 🌟 Split the phone string by "-"
+      // Stored phone numbers use the form areaCode-number.
       const phoneStr = profile.phone ?? '';
       if (phoneStr.includes('-')) {
         const parts = phoneStr.split('-');
@@ -63,7 +63,7 @@ export function ProfileScreen() {
     if (!token) return;
     try {
       setLoading(true);
-      // 🌟 Combine before saving
+      // Join area code and number before saving the profile.
       const finalPhone = areaCode ? `${areaCode}-${phoneNumber}` : phoneNumber;
       
       await updateProfile({...form, phone: finalPhone});
@@ -85,7 +85,7 @@ export function ProfileScreen() {
         <TextInput label="First Name" value={form.firstName} onChangeText={v => onChange('firstName', v)} />
         <TextInput label="Last Name" value={form.lastName} onChangeText={v => onChange('lastName', v)} />
         
-        {/* 🌟 Two blocks for Phone Number */}
+        {/* Area code and local number */}
         <View style={styles.phoneRow}>
           <TextInput 
             label="Code (e.g. 852)" 
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     marginBottom: 10,
   },
-  // 🌟 Styles for the phone row
+  // Phone row layout.
   phoneRow: {
     flexDirection: 'row',
     gap: 10,

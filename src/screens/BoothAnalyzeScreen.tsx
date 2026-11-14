@@ -29,11 +29,10 @@ export function BoothAnalyzeScreen() {
   const photoOutput = usePhotoOutput({quality: CAMERA_CAPTURE_QUALITY});
   const {hasPermission, requestPermission} = useCameraPermission();
   
-  // 狀態管理
   const [images, setImages] = useState<PickedImage[]>([]);
   const [showForm, setShowForm] = useState(false);
   
-  // 表單資料 (初始值改為空字串)
+  // Booth dimension fields start empty.
   const [boothWidth, setBoothWidth] = useState('');
   const [boothLength, setBoothLength] = useState('');
   const [boothHeight, setBoothHeight] = useState('');
@@ -164,7 +163,7 @@ export function BoothAnalyzeScreen() {
   async function submitAnalyze() {
     if (loading) return;
     
-    // 驗證：除了 requestInfo 以外，其他欄位都必須填寫
+    // All dimension fields are required; requestInfo is optional.
     if (!boothWidth.trim() || !boothLength.trim() || !boothHeight.trim() || !boothSizeUnit.trim()) {
       showError('Please fill in all booth dimensions and unit');
       return;
@@ -197,7 +196,7 @@ export function BoothAnalyzeScreen() {
       });
       showSuccess(`Analyze request created: ${referenceCode}`);
       
-      // 提交成功後重置所有狀態
+      // Reset the form after a successful submission.
       setImages([]);
       setShowForm(false);
       setBoothWidth('');
@@ -212,9 +211,7 @@ export function BoothAnalyzeScreen() {
     }
   }
 
-  // ==========================================
-  // 畫面 2：表單與照片確認頁面
-  // ==========================================
+  // Photo confirmation and booth details form.
   if (showForm) {
     return (
       <SafeAreaView style={styles.formScreenContainer}>
@@ -271,9 +268,7 @@ export function BoothAnalyzeScreen() {
     );
   }
 
-  // ==========================================
-  // 畫面 1：全螢幕相機頁面
-  // ==========================================
+  // Full-screen camera capture.
   return (
     <View style={styles.mainContainer}>
       {hasPermission && device ? (
@@ -357,7 +352,7 @@ export function BoothAnalyzeScreen() {
 }
 
 const styles = StyleSheet.create({
-  // --- 相機畫面樣式 ---
+  // Camera screen styles.
   mainContainer: {
     flex: 1,
     backgroundColor: '#000000',
@@ -487,7 +482,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
 
-  // --- 表單畫面樣式 ---
+  // Form screen styles.
   formScreenContainer: {
     flex: 1,
     backgroundColor: boothLensColors.background,

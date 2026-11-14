@@ -4,7 +4,6 @@ Project goal
 - Build the React Native frontend app for Booth Lens.
 - Backend source of truth is `boothlens-backend`.
 - Follow clean architecture, reusable components, and consistent API/error handling.
-- Please stick to best practice.
 
 UI and app shell
 - Theme: light blue theme using React Native Paper.

@@ -31,7 +31,7 @@ export function HomeScreen() {
   );
 
   return (
-    // 🌟 必須加一個最外層的 View 把他們包起來
+    // Wrap the header and list so both share the same screen layout.
     <View style={styles.mainContainer}>
       
       {/* 上半部：固定在頂部的歡迎卡片 */}
@@ -78,7 +78,7 @@ export function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  // 🌟 新增最外層的樣式
+  // Screen container.
   mainContainer: {
     flex: 1, // 撐滿整個螢幕
     backgroundColor: boothLensColors.background,

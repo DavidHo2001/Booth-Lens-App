@@ -13,7 +13,7 @@ export function RegisterScreen({navigation}: {navigation: any}) {
     verificationCode: '',
   });
   
-  // 🌟 Separate states for phone
+  // Area code and local number are edited separately, then joined for registration.
   const [areaCode, setAreaCode] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   
@@ -45,7 +45,7 @@ export function RegisterScreen({navigation}: {navigation: any}) {
     }
     try {
       setLoading(true);
-      // 🌟 Combine before sending
+      // Join area code and number before submitting.
       const finalPhone = areaCode && phoneNumber ? `${areaCode}-${phoneNumber}` : phoneNumber;
       
       await register({ ...form, phone: finalPhone });
@@ -72,7 +72,7 @@ export function RegisterScreen({navigation}: {navigation: any}) {
           Send Verification Code
         </Button>
         {showPasswordFields && (<>
-        {/* 🌟 Two blocks for Phone Number */}
+        {/* Area code and local number */}
         <View style={styles.phoneRow}>
           <TextInput 
             label="Code" 
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 6,
   },
-  // 🌟 Styles for the phone row
+  // Phone row layout.
   phoneRow: {
     flexDirection: 'row',
     gap: 10,

@@ -85,9 +85,6 @@ export async function compressImageToUnderLimit(
         const size = resized.size ?? (await getImageSizeInBytes(uri));
         candidateFile = compressedFile;
         candidateSize = size;
-        //log before and after image size
-        console.log('before image size', await getImageSizeInBytes(image.uri));
-        console.log('after image size', await getImageSizeInBytes(uri));
         if (size !== null && size <= maxBytes) {
           return {file: compressedFile, sizeBytes: size};
         }
@@ -112,8 +109,6 @@ export async function compressImagesToUnderLimit(
   
   for (const image of images) {
     const compressed = await compressImageToUnderLimit(image, maxBytes);
-    console.log('compressed', compressed);
-    console.log('image', image);
     files.push(compressed.file);
     if (compressed.sizeBytes === null || compressed.sizeBytes > maxBytes) {
       failed.push({name: image.name, sizeBytes: compressed.sizeBytes});

@@ -2,7 +2,7 @@ import React, {useCallback, useState} from 'react';
 import {FlatList, RefreshControl, StyleSheet, View} from 'react-native';
 import {Button, Text} from 'react-native-paper';
 import {useFocusEffect} from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; // 🌟 Import Icons
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useAuth} from '../context/AuthContext';
 import {getMyTransactions, getMyCredits} from '../api/user';
 import {TransactionDto, UserCreditsResponse} from '../types/api';
@@ -58,7 +58,7 @@ export function CreditsScreen() {
             My Credits
           </Text>
           
-          {/* 🌟 New Side-by-Side Credits Panel */}
+          {/* Token and super-token balances */}
           <View style={styles.creditsRow}>
             <View style={styles.creditBlock}>
               <MaterialCommunityIcons name="currency-usd" size={28} color={boothLensColors.primaryDark} />
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     color: boothLensColors.primaryDark,
     fontWeight: '800',
   },
-  // 🌟 New Styles for the Credits Row
+  // Side-by-side credit balances.
   creditsRow: {
     flexDirection: 'row',
     backgroundColor: boothLensColors.surface,
